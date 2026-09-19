@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import Navigation, { navigationRef } from './src/navigation';
 import { TOKEN_KEY, setUnauthorizedHandler } from './src/api/client';
-import { styles } from './src/styles';
+import { colors, styles } from './src/styles';
 
 export default function App() {
   const [checkingSession, setCheckingSession] = useState(true);
@@ -40,15 +40,34 @@ export default function App() {
   if (checkingSession) {
     return (
       <View style={[styles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator />
+        <ActivityIndicator color={colors.green} />
       </View>
     );
   }
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer
+      ref={navigationRef}
+      theme={{
+        dark: true,
+        colors: {
+          primary: colors.green,
+          background: colors.bg,
+          card: colors.bg,
+          text: colors.ink,
+          border: colors.border,
+          notification: colors.green,
+        },
+        fonts: {
+          regular: { fontFamily: 'System', fontWeight: '400' },
+          medium: { fontFamily: 'System', fontWeight: '500' },
+          bold: { fontFamily: 'System', fontWeight: '700' },
+          heavy: { fontFamily: 'System', fontWeight: '800' },
+        },
+      }}
+    >
       <Navigation initialRoute={initialRoute} />
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
     </NavigationContainer>
   );
 }

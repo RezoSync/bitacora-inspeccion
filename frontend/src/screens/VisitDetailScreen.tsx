@@ -1,12 +1,15 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator, Image, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { api } from '../api/client';
 import { pickAndUploadEvidence, resolveEvidenceUrl } from '../api/evidence';
 import { RootStackParamList } from '../navigation';
 import { VisitDetail } from '../types';
-import { styles } from '../styles';
+import { colors, styles } from '../styles';
+import FadeIn from '../components/FadeIn';
+import StatusBadge from '../components/StatusBadge';
+import { CameraIcon, GalleryIcon } from '../components/Icon';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'VisitDetail'>;
 
@@ -62,25 +65,37 @@ export default function VisitDetailScreen({ route }: Props) {
 
   if (!visit) {
     return (
-      <View style={[styles.screen, { justifyContent: 'center' }]}>
-        <ActivityIndicator />
+      <View style={[styles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator color={colors.green} />
       </View>
     );
   }
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.content}>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <FadeIn style={{ gap: 14 }}>
         <Text style={styles.title}>{visit.client_name}</Text>
 
         <View style={styles.card}>
-          <Text style={styles.subtitle}>Lugar</Text>
-          <Text style={{ fontSize: 18, fontWeight: '700' }}>{visit.location_name}</Text>
-          <Text style={styles.subtitle}>{visit.address || 'Sin dirección'}</Text>
-          <Text style={styles.subtitle}>Estado: {visit.status}</Text>
-          <Text style={styles.subtitle}>
-            Pasos: {visit.steps_detected} · Distancia: {visit.distance_m} m
-          </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View style={{ gap: 2, flex: 1 }}>
+              <Text style={styles.subtitle}>Lugar</Text>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: colors.ink }}>{visit.location_name}</Text>
+              <Text style={styles.subtitle}>{visit.address || 'Sin dirección'}</Text>
+            </View>
+            <StatusBadge status={visit.status} />
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: 24, marginTop: 10 }}>
+            <View>
+              <Text style={[styles.statValue, { fontSize: 26 }]}>{visit.steps_detected}</Text>
+              <Text style={styles.statLabel}>pasos</Text>
+            </View>
+            <View>
+              <Text style={[styles.statValue, { fontSize: 26 }]}>{visit.distance_m}</Text>
+              <Text style={styles.statLabel}>metros</Text>
+            </View>
+          </View>
         </View>
 
         {visit.notes && (
@@ -98,7 +113,7 @@ export default function VisitDetailScreen({ route }: Props) {
               <Image
                 key={item.id}
                 source={{ uri: resolveEvidenceUrl(item.file_path) }}
-                style={{ width: '100%', height: 180, borderRadius: 8 }}
+                style={{ width: '100%', height: 180, borderRadius: 16 }}
                 resizeMode="cover"
               />
             ) : (
@@ -110,24 +125,32 @@ export default function VisitDetailScreen({ route }: Props) {
 
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <Pressable
-              style={[styles.button, { flex: 1, opacity: uploadingEvidence ? 0.6 : 1 }]}
+              style={({ pressed }) => [
+                styles.buttonSecondary,
+                { flex: 1, flexDirection: 'row', gap: 8, justifyContent: 'center', opacity: uploadingEvidence ? 0.6 : pressed ? 0.85 : 1 },
+              ]}
               onPress={() => attachEvidence('camera')}
               disabled={uploadingEvidence}
             >
-              <Text style={styles.buttonText}>Tomar foto</Text>
+              <CameraIcon size={18} color={colors.green} />
+              <Text style={styles.buttonSecondaryText}>Tomar foto</Text>
             </Pressable>
             <Pressable
-              style={[styles.button, { flex: 1, opacity: uploadingEvidence ? 0.6 : 1 }]}
+              style={({ pressed }) => [
+                styles.buttonSecondary,
+                { flex: 1, flexDirection: 'row', gap: 8, justifyContent: 'center', opacity: uploadingEvidence ? 0.6 : pressed ? 0.85 : 1 },
+              ]}
               onPress={() => attachEvidence('library')}
               disabled={uploadingEvidence}
             >
-              <Text style={styles.buttonText}>Elegir de galería</Text>
+              <GalleryIcon size={18} color={colors.green} />
+              <Text style={styles.buttonSecondaryText}>Elegir de galería</Text>
             </Pressable>
           </View>
-          {uploadingEvidence && <ActivityIndicator />}
+          {uploadingEvidence && <ActivityIndicator color={colors.green} />}
           {!!evidenceError && <Text style={styles.error}>{evidenceError}</Text>}
         </View>
-      </View>
-    </View>
+      </FadeIn>
+    </ScrollView>
   );
 }

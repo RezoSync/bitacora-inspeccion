@@ -1,11 +1,13 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Accelerometer } from 'expo-sensors';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { pickAndUploadEvidence } from '../api/evidence';
 import { api } from '../api/client';
 import { RootStackParamList } from '../navigation';
-import { styles } from '../styles';
+import { colors, styles } from '../styles';
+import FadeIn from '../components/FadeIn';
+import { CameraIcon, GalleryIcon } from '../components/Icon';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ActiveInspection'>;
 
@@ -79,49 +81,77 @@ export default function ActiveInspectionScreen({ route, navigation }: Props) {
   }
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Inspección activa</Text>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <FadeIn style={{ gap: 14 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.green }} />
+          <Text style={styles.title}>Inspección activa</Text>
+        </View>
 
         <View style={styles.card}>
           <Text style={styles.subtitle}>Pasos detectados</Text>
-          <Text style={{ fontSize: 34, fontWeight: '800' }}>{steps}</Text>
-          <Text style={styles.subtitle}>Distancia aproximada: {distance.toFixed(1)} m</Text>
+          <Text style={styles.statValue}>{steps}</Text>
+          <Text style={styles.statLabel}>Distancia aproximada: {distance.toFixed(1)} m</Text>
         </View>
 
         <View style={styles.card}>
           <Text style={styles.subtitle}>Evidencia adjuntada: {evidenceCount}</Text>
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <Pressable
-              style={[styles.button, { flex: 1, opacity: uploadingEvidence ? 0.6 : 1 }]}
+              style={({ pressed }) => [
+                styles.buttonSecondary,
+                { flex: 1, flexDirection: 'row', gap: 8, justifyContent: 'center', opacity: uploadingEvidence ? 0.6 : pressed ? 0.85 : 1 },
+              ]}
               onPress={() => attachEvidence('camera')}
               disabled={uploadingEvidence}
             >
-              <Text style={styles.buttonText}>Tomar foto</Text>
+              <CameraIcon size={18} color={colors.green} />
+              <Text style={styles.buttonSecondaryText}>Tomar foto</Text>
             </Pressable>
             <Pressable
-              style={[styles.button, { flex: 1, opacity: uploadingEvidence ? 0.6 : 1 }]}
+              style={({ pressed }) => [
+                styles.buttonSecondary,
+                { flex: 1, flexDirection: 'row', gap: 8, justifyContent: 'center', opacity: uploadingEvidence ? 0.6 : pressed ? 0.85 : 1 },
+              ]}
               onPress={() => attachEvidence('library')}
               disabled={uploadingEvidence}
             >
-              <Text style={styles.buttonText}>Elegir de galería</Text>
+              <GalleryIcon size={18} color={colors.green} />
+              <Text style={styles.buttonSecondaryText}>Elegir de galería</Text>
             </Pressable>
           </View>
-          {uploadingEvidence && <ActivityIndicator />}
+          {uploadingEvidence && <ActivityIndicator color={colors.green} />}
           {!!evidenceError && <Text style={styles.error}>{evidenceError}</Text>}
         </View>
 
         <Text style={styles.label}>Resumen de movimiento</Text>
-        <TextInput style={styles.input} value={motion} onChangeText={setMotion} placeholder="Describe el recorrido" />
+        <TextInput
+          style={styles.input}
+          value={motion}
+          onChangeText={setMotion}
+          placeholder="Describe el recorrido"
+          placeholderTextColor={colors.faint}
+        />
 
         <Text style={styles.label}>Notas</Text>
-        <TextInput style={[styles.input, { minHeight: 90 }]} value={notes} onChangeText={setNotes} multiline />
+        <TextInput
+          style={[styles.input, { minHeight: 90, textAlignVertical: 'top' }]}
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+          placeholder="Observaciones adicionales"
+          placeholderTextColor={colors.faint}
+        />
 
         {!!finishError && <Text style={styles.error}>{finishError}</Text>}
-        <Pressable style={[styles.button, { opacity: finishing ? 0.6 : 1 }]} onPress={finish} disabled={finishing}>
-          <Text style={styles.buttonText}>{finishing ? 'Guardando...' : 'Finalizar visita'}</Text>
+        <Pressable
+          style={({ pressed }) => [styles.button, { opacity: finishing ? 0.7 : pressed ? 0.9 : 1 }]}
+          onPress={finish}
+          disabled={finishing}
+        >
+          {finishing ? <ActivityIndicator color={colors.greenInk} /> : <Text style={styles.buttonText}>Finalizar visita</Text>}
         </Pressable>
-      </View>
-    </View>
+      </FadeIn>
+    </ScrollView>
   );
 }

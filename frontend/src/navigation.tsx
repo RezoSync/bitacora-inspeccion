@@ -5,6 +5,7 @@ import HomeScreen from './screens/HomeScreen';
 import NewVisitScreen from './screens/NewVisitScreen';
 import ActiveInspectionScreen from './screens/ActiveInspectionScreen';
 import VisitDetailScreen from './screens/VisitDetailScreen';
+import { colors } from './styles';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -28,7 +29,14 @@ export default function Navigation({ initialRoute }: Props) {
   return (
     <Stack.Navigator
       initialRouteName={initialRoute}
-      screenOptions={{ headerTintColor: '#102a43', headerTitleStyle: { fontWeight: '700' } }}
+      screenOptions={{
+        headerTintColor: colors.ink,
+        headerTitleStyle: { fontWeight: '700', color: colors.ink },
+        headerStyle: { backgroundColor: colors.bg },
+        headerShadowVisible: false,
+        contentStyle: { backgroundColor: colors.bg },
+        animation: 'slide_from_right',
+      }}
     >
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Mis visitas' }} />
